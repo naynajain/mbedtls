@@ -1,0 +1,31 @@
+PKCS7 Signed Data verification #1
+depends_on:MBEDTLS_PKCS7_USE_C
+pkcs7_verify:"data_files/pkcs7.data.signed":"data_files/cli-rsa-sha256.crt":"data_files/pkcs7.data"
+
+PKCS7 Signed Data verification Fail #1
+depends_on:MBEDTLS_PKCS7_USE_C
+pkcs7_verify_fail1:"data_files/pkcs7.data.signed":"data_files/cli2.crt":"data_files/pkcs7.data"
+
+PKCS7 Signed Data verification Fail #2
+depends_on:MBEDTLS_PKCS7_USE_C
+pkcs7_verify_fail2:"data_files/pkcs7.data.signed":"data_files/cli-rsa-sha256.crt":"data_files/pkcs7.data.1"
+
+PKCS7 Signed Data Parse Version #1
+depends_on: MBEDTLS_PKCS7_USE_C
+pkcs7_parse_version:"data_files/pkcs7.data.signed"
+
+PKCS7 Signed Data Parse Encrypted Content #1
+depends_on: MBEDTLS_PKCS7_USE_C
+pkcs7_parse_content_oid:"data_files/pkcs7.data.encrypted"
+
+PKCS7 Signed Data Parse SHA1 digest algorithm #1
+depends_on: MBEDTLS_PKCS7_USE_C
+pkcs7_parse_digest_algorithm:"data_files/pkcs7.data.signed.sha1"
+
+PKCS7 Signed Data Parse certificate chain #1
+depends_on: MBEDTLS_PKCS7_USE_C
+pkcs7_parse_cert_chain:"data_files/pkcs7.data.signed.certchain"
+
+PKCS7 Signed Data Parse multiple signers #1
+depends_on: MBEDTLS_PKCS7_USE_C
+pkcs7_parse_multiple_sign:"data_files/pkcs7.data.signed.multiplesigners"
