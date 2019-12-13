@@ -5,23 +5,18 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/x509_crl.h"
 #include "mbedtls/oid.h"
-#include "stdio.h"
-#include "string.h"
 /* END_HEADER */
 
 /* BEGIN_DEPENDENCIES
  * END_DEPENDENCIES
  */
 
-
-
 /* BEGIN_CASE */
-void pkcs7_verify(char *pkcs7_file, char *crt, char *filetobesigned )
+void pkcs7_verify( char *pkcs7_file, char *crt, char *filetobesigned )
 {
-
 	unsigned char *pkcs7_buf;
 	size_t buflen;
-	const unsigned char *data;
+	unsigned char *data = NULL;
 	int datalen;
 	int res;
 	FILE *file;
@@ -29,300 +24,285 @@ void pkcs7_verify(char *pkcs7_file, char *crt, char *filetobesigned )
 	mbedtls_pkcs7 pkcs7;
 	mbedtls_x509_crt x509;
 
-	mbedtls_pkcs7_init(&pkcs7);
+	mbedtls_pkcs7_init( &pkcs7 );
 
-	res = mbedtls_pkcs7_load_file(pkcs7_file, &pkcs7_buf, &buflen);
+	res = mbedtls_pkcs7_load_file( pkcs7_file, &pkcs7_buf, &buflen );
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	res = mbedtls_pkcs7_parse_der(pkcs7_buf, buflen, &pkcs7);
-	TEST_ASSERT(res == 0);
+	res = mbedtls_pkcs7_parse_der( pkcs7_buf, buflen, &pkcs7 );
+	TEST_ASSERT( res == 0 );
 
- 	mbedtls_x509_crt_init(&x509);
+ 	mbedtls_x509_crt_init( &x509 );
 
 	res = mbedtls_x509_crt_parse_file( &x509, crt );
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	file = fopen(filetobesigned, "r");
+	file = fopen( filetobesigned, "r" );
 
-	TEST_ASSERT(file != NULL);
+	TEST_ASSERT( file != NULL );
 
 	/* Get the number of bytes */
-	fseek(file, 0L, SEEK_END);
-	datalen = ftell(file);
+	fseek( file, 0L, SEEK_END );
+	datalen = ftell( file );
 
 	/* reset the file position indicator to the beginning of the file */
-	fseek(file, 0L, SEEK_SET);
+	fseek( file, 0L, SEEK_SET );
 
 	/* grab sufficient memory for the buffer to hold the text */
-	data = (unsigned char*)calloc(datalen, sizeof(unsigned char));
-
-	/* memory error */
-	if(data == NULL)
-		return;
+	data = ( unsigned char* ) calloc( datalen, sizeof( unsigned char ) );
 
 	/* copy all the text into the buffer */
-	fread((void *)data , sizeof(unsigned char), datalen, file);
-	fclose(file);
+	fread( (void *)data , sizeof( unsigned char ), datalen, file );
+	fclose( file );
 
-	res = mbedtls_pkcs7_signed_data_verify(&pkcs7, &x509, data, datalen);
-	TEST_ASSERT(res == 0);
+	res = mbedtls_pkcs7_signed_data_verify( &pkcs7, &x509, data, datalen );
+	TEST_ASSERT( res == 0 );
 
 exit:
- 	mbedtls_x509_crt_free(&x509);
-	free(data);
-	free(pkcs7_buf);
-	mbedtls_pkcs7_free(&pkcs7);
+ 	mbedtls_x509_crt_free( &x509 );
+	mbedtls_free( data );
+	mbedtls_free( pkcs7_buf );
+	mbedtls_pkcs7_free( &pkcs7 );
 }
 /* END_CASE */
 
 /* BEGIN_CASE */
-void pkcs7_verify_fail1(char *pkcs7_file, char *crt, char *filetobesigned )
+void pkcs7_verify_fail1( char *pkcs7_file, char *crt, char *filetobesigned )
 {
-	unsigned char *pkcs7_buf;
+	unsigned char *pkcs7_buf = NULL;
 	size_t buflen;
-	const unsigned char *data;
+	unsigned char *data = NULL;
 	int datalen;
 	int res;
 	FILE *file;
 
-
 	mbedtls_pkcs7 pkcs7;
 	mbedtls_x509_crt x509;
 
-	mbedtls_pkcs7_init(&pkcs7);
+	mbedtls_pkcs7_init( &pkcs7 );
 
-	res = mbedtls_pkcs7_load_file(pkcs7_file, &pkcs7_buf, &buflen);
+	res = mbedtls_pkcs7_load_file( pkcs7_file, &pkcs7_buf, &buflen );
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	res = mbedtls_pkcs7_parse_der(pkcs7_buf, buflen, &pkcs7);
-	TEST_ASSERT(res == 0);
+	res = mbedtls_pkcs7_parse_der( pkcs7_buf, buflen, &pkcs7 );
+	TEST_ASSERT( res == 0 );
 
- 	mbedtls_x509_crt_init(&x509);
+ 	mbedtls_x509_crt_init( &x509 );
 
 	res = mbedtls_x509_crt_parse_file( &x509, crt );
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	file = fopen(filetobesigned, "r");
+	file = fopen( filetobesigned, "r" );
 
-	TEST_ASSERT(file != NULL);
+	TEST_ASSERT( file != NULL );
 
 	/* Get the number of bytes */
-	fseek(file, 0L, SEEK_END);
-	datalen = ftell(file);
+	fseek( file, 0L, SEEK_END );
+	datalen = ftell( file );
 
 	/* reset the file position indicator to the beginning of the file */
-	fseek(file, 0L, SEEK_SET);
+	fseek( file, 0L, SEEK_SET );
 
 	/* grab sufficient memory for the buffer to hold the text */
-	data = (unsigned char*)calloc(datalen, sizeof(unsigned char));
-
-	/* memory error */
-	if(data == NULL)
-		return;
+	data = ( unsigned char* ) calloc( datalen, sizeof( unsigned char ) );
 
 	/* copy all the text into the buffer */
-	fread((void *)data , sizeof(unsigned char), datalen, file);
+	fread( ( void * )data , sizeof( unsigned char ), datalen, file );
 	fclose(file);
 
-	res = mbedtls_pkcs7_signed_data_verify(&pkcs7, &x509, data, datalen);
+	res = mbedtls_pkcs7_signed_data_verify( &pkcs7, &x509, data, datalen );
 
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res != 0);
+	TEST_ASSERT( res != 0 );
 
 exit:
- 	mbedtls_x509_crt_free(&x509);
-	free(data);
-	free(pkcs7_buf);
-	mbedtls_pkcs7_free(&pkcs7);
+ 	mbedtls_x509_crt_free( &x509 );
+	mbedtls_free( data );
+	mbedtls_free( pkcs7_buf );
+	mbedtls_pkcs7_free( &pkcs7 );
 }
 /* END_CASE */
 
 /* BEGIN_CASE */
-void pkcs7_verify_fail2(char *pkcs7_file, char *crt, char *filetobesigned )
+void pkcs7_verify_fail2( char *pkcs7_file, char *crt, char *filetobesigned )
 {
-	unsigned char *pkcs7_buf;
+	unsigned char *pkcs7_buf = NULL;
 	size_t buflen;
-	const unsigned char *data;
+	unsigned char *data = NULL;
 	int datalen;
 	int res;
 	FILE *file;
 
-
 	mbedtls_pkcs7 pkcs7;
 	mbedtls_x509_crt x509;
 
-	mbedtls_pkcs7_init(&pkcs7);
+	mbedtls_pkcs7_init( &pkcs7 );
 
-	res = mbedtls_pkcs7_load_file(pkcs7_file, &pkcs7_buf, &buflen);
+	res = mbedtls_pkcs7_load_file( pkcs7_file, &pkcs7_buf, &buflen );
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	res = mbedtls_pkcs7_parse_der(pkcs7_buf, buflen, &pkcs7);
-	TEST_ASSERT(res == 0);
+	res = mbedtls_pkcs7_parse_der( pkcs7_buf, buflen, &pkcs7 );
+	TEST_ASSERT( res == 0 );
 
- 	mbedtls_x509_crt_init(&x509);
+ 	mbedtls_x509_crt_init( &x509 );
 
 	res = mbedtls_x509_crt_parse_file( &x509, crt );
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	file = fopen(filetobesigned, "r");
+	file = fopen( filetobesigned, "r" );
 
-	TEST_ASSERT(file != NULL);
+	TEST_ASSERT( file != NULL );
 
 	/* Get the number of bytes */
-	fseek(file, 0L, SEEK_END);
-	datalen = ftell(file);
+	fseek( file, 0L, SEEK_END );
+	datalen = ftell( file );
 
 	/* reset the file position indicator to the beginning of the file */
-	fseek(file, 0L, SEEK_SET);
+	fseek( file, 0L, SEEK_SET );
 
-	/* grab sufficient memory for the buffer to hold the text */
-	data = (unsigned char*)calloc(datalen, sizeof(unsigned char));
-
-	/* memory error */
-	if(data == NULL)
-		return;
+	data = ( unsigned char* ) calloc( datalen, sizeof(unsigned char) );
 
 	/* copy all the text into the buffer */
-	fread((void *)data , sizeof(unsigned char), datalen, file);
+	fread( ( void * )data , sizeof( unsigned char ), datalen, file );
 	fclose(file);
 
-	res = mbedtls_pkcs7_signed_data_verify(&pkcs7, &x509, data, datalen);
+	res = mbedtls_pkcs7_signed_data_verify( &pkcs7, &x509, data, datalen );
 
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res != 0);
+	TEST_ASSERT( res != 0 );
 
 exit:
- 	mbedtls_x509_crt_free(&x509);
-	mbedtls_pkcs7_free(&pkcs7);
-	free(data);
-	free(pkcs7_buf);
+ 	mbedtls_x509_crt_free( &x509 );
+	mbedtls_pkcs7_free( &pkcs7 );
+	mbedtls_free( data );
+	mbedtls_free( pkcs7_buf );
 
 }
 /* END_CASE */
 
 /* BEGIN_CASE */
-void pkcs7_parse_version(char *pkcs7_file )
+void pkcs7_parse_version( char *pkcs7_file )
 {
-	unsigned char *pkcs7_buf;
+	unsigned char *pkcs7_buf = NULL;
 	size_t buflen;
 	int res;
 	mbedtls_pkcs7 pkcs7;
 
-	mbedtls_pkcs7_init(&pkcs7);
+	mbedtls_pkcs7_init( &pkcs7 );
 
-	res = mbedtls_pkcs7_load_file(pkcs7_file, &pkcs7_buf, &buflen);
+	res = mbedtls_pkcs7_load_file( pkcs7_file, &pkcs7_buf, &buflen );
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	res = mbedtls_pkcs7_parse_der(pkcs7_buf, buflen, &pkcs7);
-	TEST_ASSERT(res == 0);
+	res = mbedtls_pkcs7_parse_der( pkcs7_buf, buflen, &pkcs7 );
+	TEST_ASSERT( res == 0 );
 
-	TEST_ASSERT(pkcs7.signed_data.version == 1);
+	TEST_ASSERT( pkcs7.signed_data.version == 1 );
 exit:
-	mbedtls_pkcs7_free(&pkcs7);
-	free(pkcs7_buf);
+	mbedtls_pkcs7_free( &pkcs7 );
+	mbedtls_free( pkcs7_buf );
 }
 /* END_CASE */
 
 /* BEGIN_CASE */
-void pkcs7_parse_content_oid(char *pkcs7_file )
+void pkcs7_parse_content_oid( char *pkcs7_file )
 {
-	unsigned char *pkcs7_buf;
+	unsigned char *pkcs7_buf = NULL;
 	size_t buflen;
 	int res;
 	mbedtls_pkcs7 pkcs7;
 
-	mbedtls_pkcs7_init(&pkcs7);
+	mbedtls_pkcs7_init( &pkcs7 );
 
-	res = mbedtls_pkcs7_load_file(pkcs7_file, &pkcs7_buf, &buflen);
+	res = mbedtls_pkcs7_load_file( pkcs7_file, &pkcs7_buf, &buflen);
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	res = mbedtls_pkcs7_parse_der(pkcs7_buf, buflen, &pkcs7);
+	res = mbedtls_pkcs7_parse_der( pkcs7_buf, buflen, &pkcs7 );
 	mbedtls_fprintf( stderr, "Expected erro: %04x\n", res );
-	TEST_ASSERT(res != 0);
-	TEST_ASSERT(res == -0x7080);
+	TEST_ASSERT( res != 0 );
+	TEST_ASSERT( res == -0x7080 );
 exit:
-	free(pkcs7_buf);
-	mbedtls_pkcs7_free(&pkcs7);
+	mbedtls_free( pkcs7_buf );
+	mbedtls_pkcs7_free( &pkcs7 );
 }
 /* END_CASE */
 
 /* BEGIN_CASE */
-void pkcs7_parse_digest_algorithm(char *pkcs7_file )
+void pkcs7_parse_digest_algorithm( char *pkcs7_file )
 {
-	unsigned char *pkcs7_buf;
+	unsigned char *pkcs7_buf = NULL;
 	size_t buflen;
 	int res;
 	mbedtls_pkcs7 pkcs7;
 
-	mbedtls_pkcs7_init(&pkcs7);
+	mbedtls_pkcs7_init( &pkcs7 );
 
-	res = mbedtls_pkcs7_load_file(pkcs7_file, &pkcs7_buf, &buflen);
+	res = mbedtls_pkcs7_load_file( pkcs7_file, &pkcs7_buf, &buflen );
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	res = mbedtls_pkcs7_parse_der(pkcs7_buf, buflen, &pkcs7);
-	TEST_ASSERT(res != 0);
+	res = mbedtls_pkcs7_parse_der( pkcs7_buf, buflen, &pkcs7 );
+	TEST_ASSERT( res != 0 );
 exit:
-	free(pkcs7_buf);
-	mbedtls_pkcs7_free(&pkcs7);
+	mbedtls_free( pkcs7_buf );
+	mbedtls_pkcs7_free( &pkcs7 );
 }
 /* END_CASE */
 
 /* BEGIN_CASE */
-void pkcs7_parse_cert_chain(char *pkcs7_file )
+void pkcs7_parse_cert_chain( char *pkcs7_file )
 {
-	unsigned char *pkcs7_buf;
+	unsigned char *pkcs7_buf = NULL;
 	size_t buflen;
 	int res;
 	mbedtls_pkcs7 pkcs7;
 
-	mbedtls_pkcs7_init(&pkcs7);
+	mbedtls_pkcs7_init( &pkcs7 );
 
-	res = mbedtls_pkcs7_load_file(pkcs7_file, &pkcs7_buf, &buflen);
+	res = mbedtls_pkcs7_load_file( pkcs7_file, &pkcs7_buf, &buflen );
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	res = mbedtls_pkcs7_parse_der(pkcs7_buf, buflen, &pkcs7);
-	TEST_ASSERT(res == 0);
+	res = mbedtls_pkcs7_parse_der( pkcs7_buf, buflen, &pkcs7 );
+	TEST_ASSERT( res == 0 );
 exit:
-	free(pkcs7_buf);
-	mbedtls_pkcs7_free(&pkcs7);
+	mbedtls_free( pkcs7_buf );
+	mbedtls_pkcs7_free( &pkcs7 );
 }
 /* END_CASE */
 
 /* BEGIN_CASE */
-void pkcs7_parse_multiple_sign(char *pkcs7_file )
+void pkcs7_parse_multiple_sign( char *pkcs7_file )
 {
-	unsigned char *pkcs7_buf;
+	unsigned char *pkcs7_buf = NULL;
 	size_t buflen;
 	int res;
 	mbedtls_pkcs7 pkcs7;
 	char name_buf[1000];
 
-	mbedtls_pkcs7_init(&pkcs7);
+	mbedtls_pkcs7_init( &pkcs7 );
 
-	res = mbedtls_pkcs7_load_file(pkcs7_file, &pkcs7_buf, &buflen);
+	res = mbedtls_pkcs7_load_file( pkcs7_file, &pkcs7_buf, &buflen );
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
-	TEST_ASSERT(res == 0);
+	TEST_ASSERT( res == 0 );
 
-	res = mbedtls_pkcs7_parse_der(pkcs7_buf, buflen, &pkcs7);
-	TEST_ASSERT(res == 0);
+	res = mbedtls_pkcs7_parse_der( pkcs7_buf, buflen, &pkcs7 );
+	TEST_ASSERT( res == 0 );
 
-	mbedtls_x509_dn_gets(name_buf, 1000, &pkcs7.signed_data.signers.issuer);
-	mbedtls_fprintf(stderr, "%s", name_buf);
-	memset(name_buf, 0, sizeof(name_buf));
-	mbedtls_x509_serial_gets(name_buf, 1000, &pkcs7.signed_data.signers.serial);
-	mbedtls_fprintf(stderr, "%s", name_buf);
+	mbedtls_x509_dn_gets( name_buf, 1000, &pkcs7.signed_data.signers.issuer );
+	mbedtls_fprintf( stderr, "%s", name_buf );
+	memset( name_buf, 0, sizeof( name_buf ) );
+	mbedtls_x509_serial_gets( name_buf, 1000, &pkcs7.signed_data.signers.serial );
+	mbedtls_fprintf( stderr, "%s", name_buf );
 exit:
-	free(pkcs7_buf);
-	mbedtls_pkcs7_free(&pkcs7);
+	mbedtls_free( pkcs7_buf );
+	mbedtls_pkcs7_free( &pkcs7 );
 }
 /* END_CASE */
