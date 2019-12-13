@@ -486,13 +486,8 @@ void mbedtls_pkcs7_free(  mbedtls_pkcs7 *pkcs7 )
 	if (pkcs7 == NULL)
 		return;
 
-	printf("1\n");
-	fflush(stdout);
 	mbedtls_x509_crt_free( &pkcs7->signed_data.certs );
 	mbedtls_x509_crl_free( &pkcs7->signed_data.crl );
-
-	printf("2\n");
-	fflush(stdout);
 
 	name_cur = pkcs7->signed_data.signers.issuer.next;
         while( name_cur != NULL )
@@ -502,86 +497,6 @@ void mbedtls_pkcs7_free(  mbedtls_pkcs7 *pkcs7 )
             mbedtls_platform_zeroize( name_prv, sizeof( mbedtls_x509_name ) );
             mbedtls_free( name_prv );
         }
-/**
-        if( pkcs7->signed_data.digest_alg_identifiers.p != NULL )
-        {
-            mbedtls_platform_zeroize( pkcs7->signed_data.digest_alg_identifiers.p, pkcs7->signed_data.digest_alg_identifiers.len );
-            free( pkcs7->signed_data.digest_alg_identifiers.p );
-        }
-        if( pkcs7->content_type_oid.p != NULL )
-        {
-            mbedtls_platform_zeroize( pkcs7->content_type_oid.p, pkcs7->content_type_oid.len );
-            mbedtls_free( pkcs7->content_type_oid.p );
-        }
-
-	printf("3\n");
-	fflush(stdout);
-        if( pkcs7->signed_data.digest_alg_identifiers.p != NULL )
-        {
-            mbedtls_platform_zeroize( pkcs7->signed_data.digest_alg_identifiers.p, pkcs7->signed_data.digest_alg_identifiers.len );
-            mbedtls_free( pkcs7->signed_data.digest_alg_identifiers.p );
-        }
-
-	printf("4\n");
-	fflush(stdout);
-        if( pkcs7->signed_data.content.oid.p != NULL )
-        {
-            mbedtls_platform_zeroize( pkcs7->signed_data.content.oid.p, pkcs7->signed_data.content.oid.len );
-            mbedtls_free( pkcs7->signed_data.content.oid.p );
-        }
-
-	printf("5\n");
-	fflush(stdout);
-        if( pkcs7->signed_data.content.data.p != NULL )
-        {
-            mbedtls_platform_zeroize( pkcs7->signed_data.content.data.p, pkcs7->signed_data.content.data.len );
-            mbedtls_free( pkcs7->signed_data.content.data.p );
-        }
-
-	printf("6\n");
-	fflush(stdout);
-        if( pkcs7->signed_data.content.data.p != NULL )
-        if( pkcs7->signed_data.signers.serial.p != NULL )
-        {
-            mbedtls_platform_zeroize( pkcs7->signed_data.signers.serial.p, pkcs7->signed_data.signers.serial.len );
-            mbedtls_free( pkcs7->signed_data.signers.serial.p );
-        }
-
-	printf("7\n");
-	fflush(stdout);
-
-	printf("8\n");
-	fflush(stdout);
-        if( pkcs7->signed_data.signers.issuer_raw.p != NULL )
-        {
-            mbedtls_platform_zeroize( pkcs7->signed_data.signers.issuer_raw.p, pkcs7->signed_data.signers.issuer_raw.len );
-            mbedtls_free( pkcs7->signed_data.signers.issuer_raw.p );
-        }
-
-	printf("9\n");
-	fflush(stdout);
-        if( pkcs7->signed_data.signers.alg_identifier.p != NULL )
-        {
-            mbedtls_platform_zeroize( pkcs7->signed_data.signers.alg_identifier.p, pkcs7->signed_data.signers.alg_identifier.len );
-            mbedtls_free( pkcs7->signed_data.signers.alg_identifier.p );
-        }
-
-	printf("10\n");
-	fflush(stdout);
-        if( pkcs7->signed_data.signers.sig_alg_identifier.p != NULL )
-        {
-            mbedtls_platform_zeroize( pkcs7->signed_data.signers.sig_alg_identifier.p, pkcs7->signed_data.signers.sig_alg_identifier.len );
-            mbedtls_free( pkcs7->signed_data.signers.sig_alg_identifier.p );
-        }
-
-	printf("11\n");
-	fflush(stdout);
-        if( pkcs7->signed_data.signers.sig.p != NULL )
-        {
-            mbedtls_platform_zeroize( pkcs7->signed_data.signers.sig.p, pkcs7->signed_data.signers.sig.len );
-            mbedtls_free( pkcs7->signed_data.signers.sig.p );
-        }
-**/
 }
 
 #endif
