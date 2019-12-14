@@ -5,6 +5,9 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/x509_crl.h"
 #include "mbedtls/oid.h"
+#include "sys/types.h"
+#include "sys/stat.h"
+#include "unistd.h"
 /* END_HEADER */
 
 /* BEGIN_DEPENDENCIES
@@ -17,6 +20,7 @@ void pkcs7_verify( char *pkcs7_file, char *crt, char *filetobesigned )
 	unsigned char *pkcs7_buf;
 	size_t buflen;
 	unsigned char *data = NULL;
+	struct stat st;
 	int datalen;
 	int res;
 	FILE *file;
@@ -39,21 +43,16 @@ void pkcs7_verify( char *pkcs7_file, char *crt, char *filetobesigned )
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
 	TEST_ASSERT( res == 0 );
 
-	file = fopen( filetobesigned, "r" );
+	res = stat(filetobesigned, &st);
+	TEST_ASSERT( res == 0 );
 
+	file = fopen( filetobesigned, "r" );
 	TEST_ASSERT( file != NULL );
 
-	/* Get the number of bytes */
-	fseek( file, 0L, SEEK_END );
-	datalen = ftell( file );
-
-	/* reset the file position indicator to the beginning of the file */
-	fseek( file, 0L, SEEK_SET );
-
-	/* grab sufficient memory for the buffer to hold the text */
+	datalen = st.st_size;
 	data = ( unsigned char* ) calloc( datalen, sizeof( unsigned char ) );
+	TEST_ASSERT( data != NULL);
 
-	/* copy all the text into the buffer */
 	fread( (void *)data , sizeof( unsigned char ), datalen, file );
 	fclose( file );
 
@@ -74,6 +73,7 @@ void pkcs7_verify_fail1( char *pkcs7_file, char *crt, char *filetobesigned )
 	unsigned char *pkcs7_buf = NULL;
 	size_t buflen;
 	unsigned char *data = NULL;
+	struct stat st;
 	int datalen;
 	int res;
 	FILE *file;
@@ -96,22 +96,16 @@ void pkcs7_verify_fail1( char *pkcs7_file, char *crt, char *filetobesigned )
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
 	TEST_ASSERT( res == 0 );
 
-	file = fopen( filetobesigned, "r" );
+	res = stat(filetobesigned, &st);
+	TEST_ASSERT( res == 0 );
 
+	file = fopen( filetobesigned, "r" );
 	TEST_ASSERT( file != NULL );
 
-	/* Get the number of bytes */
-	fseek( file, 0L, SEEK_END );
-	datalen = ftell( file );
-
-	/* reset the file position indicator to the beginning of the file */
-	fseek( file, 0L, SEEK_SET );
-
-	/* grab sufficient memory for the buffer to hold the text */
+	datalen = st.st_size;
 	data = ( unsigned char* ) calloc( datalen, sizeof( unsigned char ) );
-
-	/* copy all the text into the buffer */
 	fread( ( void * )data , sizeof( unsigned char ), datalen, file );
+
 	fclose(file);
 
 	res = mbedtls_pkcs7_signed_data_verify( &pkcs7, &x509, data, datalen );
@@ -133,6 +127,7 @@ void pkcs7_verify_fail2( char *pkcs7_file, char *crt, char *filetobesigned )
 	unsigned char *pkcs7_buf = NULL;
 	size_t buflen;
 	unsigned char *data = NULL;
+	struct stat st;
 	int datalen;
 	int res;
 	FILE *file;
@@ -155,21 +150,16 @@ void pkcs7_verify_fail2( char *pkcs7_file, char *crt, char *filetobesigned )
 	mbedtls_fprintf( stderr, "Expected erro: %05x\n", res );
 	TEST_ASSERT( res == 0 );
 
-	file = fopen( filetobesigned, "r" );
+	res = stat(filetobesigned, &st);
+	TEST_ASSERT( res == 0 );
 
+	file = fopen( filetobesigned, "r" );
 	TEST_ASSERT( file != NULL );
 
-	/* Get the number of bytes */
-	fseek( file, 0L, SEEK_END );
-	datalen = ftell( file );
-
-	/* reset the file position indicator to the beginning of the file */
-	fseek( file, 0L, SEEK_SET );
-
+	datalen = st.st_size;
 	data = ( unsigned char* ) calloc( datalen, sizeof(unsigned char) );
-
-	/* copy all the text into the buffer */
 	fread( ( void * )data , sizeof( unsigned char ), datalen, file );
+
 	fclose(file);
 
 	res = mbedtls_pkcs7_signed_data_verify( &pkcs7, &x509, data, datalen );

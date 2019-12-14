@@ -31,6 +31,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #if defined(MBEDTLS_PLATFORM_C)
 #include "mbedtls/platform.h"
@@ -60,33 +63,28 @@
 
 int mbedtls_pkcs7_load_file( const char *path, unsigned char **buf, size_t *n )
 {
-    FILE *f;
-    long size;
+    FILE *file;
+    struct stat st;
+    int rc;
 
+    rc = stat( path, &st );
+    if ( rc )
+	return( MBEDTLS_ERR_PKCS7_FILE_IO_ERROR);
 
-    if( ( f = fopen( path, "rb" ) ) == NULL )
+    if( ( file = fopen( path, "rb" ) ) == NULL )
         return( MBEDTLS_ERR_PKCS7_FILE_IO_ERROR );
 
-    fseek( f, 0, SEEK_END );
-    if( ( size = ftell( f ) ) == -1 )
-    {
-        fclose( f );
-        return( MBEDTLS_ERR_PKCS7_FILE_IO_ERROR );
-    }
-    fseek( f, 0, SEEK_SET );
+    mbedtls_printf( "file size is %lu\n", st.st_size );
 
-    *n = (size_t) size;
+    *n = (size_t) st.st_size;
 
-    if( *n + 1 == 0 ||
-        ( *buf = mbedtls_calloc( 1, *n + 1 ) ) == NULL )
-    {
-        fclose( f );
+    *buf = mbedtls_calloc( 1, *n + 1 );
+    if ( *buf == NULL )
         return( MBEDTLS_ERR_PKCS7_ALLOC_FAILED );
-    }
 
-    if( fread( *buf, 1, *n, f ) != *n )
+    if( fread( *buf, 1, *n, file ) != *n )
     {
-        fclose( f );
+        fclose( file );
 
         mbedtls_platform_zeroize( *buf, *n + 1 );
         mbedtls_free( *buf );
@@ -94,7 +92,7 @@ int mbedtls_pkcs7_load_file( const char *path, unsigned char **buf, size_t *n )
         return( MBEDTLS_ERR_PKCS7_FILE_IO_ERROR );
     }
 
-    fclose( f );
+    fclose( file );
 
     (*buf)[*n] = '\0';
 
