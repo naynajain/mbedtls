@@ -31,8 +31,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#if defined(MBEDTLS_FS_IO)
 #include <sys/types.h>
 #include <sys/stat.h>
+#endif
 #include <unistd.h>
 
 #if defined(MBEDTLS_PLATFORM_C)
@@ -54,6 +56,7 @@
 #include <time.h>
 #endif
 
+#if defined(MBEDTLS_FS_IO)
 /*
  * Load all data from a file into a given buffer.
  *
@@ -91,6 +94,7 @@ int mbedtls_pkcs7_load_file( const char *path, unsigned char **buf, size_t *n )
 
     return( 0 );
 }
+#endif
 
 /**
  * Initializes the pkcs7 structure.
