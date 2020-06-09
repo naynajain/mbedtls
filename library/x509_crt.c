@@ -3327,6 +3327,7 @@ void mbedtls_x509_crt_free( mbedtls_x509_crt *crt )
  */
 void mbedtls_x509_crt_restart_init( mbedtls_x509_crt_restart_ctx *ctx )
 {
+	/* What to do here..should I do something */
     mbedtls_pk_restart_init( &ctx->pk );
 
     ctx->parent = NULL;
