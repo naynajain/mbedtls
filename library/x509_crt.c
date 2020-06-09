@@ -3345,6 +3345,7 @@ void mbedtls_x509_crt_restart_init( mbedtls_x509_crt_restart_ctx *ctx )
  */
 void mbedtls_x509_crt_restart_free( mbedtls_x509_crt_restart_ctx *ctx )
 {
+	/* How to handle this. what to do */
     if( ctx == NULL )
         return;
 
