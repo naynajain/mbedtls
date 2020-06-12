@@ -2192,6 +2192,14 @@ int query_config( const char *config )
     }
 #endif /* MBEDTLS_VERSION_C */
 
+#if defined(MBEDTLS_PKCS7_USE_C)
+    if( strcmp( "MBEDTLS_PKCS7_USE_C", config ) == 0 )
+    {
+        MACRO_EXPANSION_TO_STR( MBEDTLS_PKCS7_USE_C );
+        return( 0 );
+    }
+#endif /* MBEDTLS_PKCS7_USE_C */
+
 #if defined(MBEDTLS_X509_USE_C)
     if( strcmp( "MBEDTLS_X509_USE_C", config ) == 0 )
     {

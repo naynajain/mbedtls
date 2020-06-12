@@ -801,6 +801,9 @@ static const char * const features[] = {
 #if defined(MBEDTLS_VERSION_C)
     "MBEDTLS_VERSION_C",
 #endif /* MBEDTLS_VERSION_C */
+#if defined(MBEDTLS_PKCS7_USE_C)
+    "MBEDTLS_PKCS7_USE_C",
+#endif /* MBEDTLS_PKCS7_USE_C */
 #if defined(MBEDTLS_X509_USE_C)
     "MBEDTLS_X509_USE_C",
 #endif /* MBEDTLS_X509_USE_C */
@@ -824,10 +827,7 @@ static const char * const features[] = {
 #endif /* MBEDTLS_X509_CSR_WRITE_C */
 #if defined(MBEDTLS_XTEA_C)
     "MBEDTLS_XTEA_C",
-#endif /* MBEDTLS_PKCS7_USE_C */
-#if defined(MBEDTLS_PKCS7_USE_C)
-    "MBEDTLS_PKCS7_USE_C",
-#endif /* MBEDTLS_PKCS7_USE_C */
+#endif /* MBEDTLS_XTEA_C */
 #endif /* MBEDTLS_VERSION_FEATURES */
     NULL
 };
