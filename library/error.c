@@ -196,6 +196,10 @@
 #include "mbedtls/pkcs5.h"
 #endif
 
+#if defined(MBEDTLS_PKCS7_C)
+#include "mbedtls/pkcs7.h"
+#endif
+
 #if defined(MBEDTLS_PLATFORM_C)
 #include "mbedtls/platform.h"
 #endif
@@ -416,6 +420,29 @@ void mbedtls_strerror( int ret, char *buf, size_t buflen )
         if( use_ret == -(MBEDTLS_ERR_PKCS5_PASSWORD_MISMATCH) )
             mbedtls_snprintf( buf, buflen, "PKCS5 - Given private key password does not allow for correct decryption" );
 #endif /* MBEDTLS_PKCS5_C */
+
+#if defined(MBEDTLS_PKCS7_C)
+        if( use_ret == -(MBEDTLS_ERR_PKCS7_FEATURE_UNAVAILABLE) )
+            mbedtls_snprintf( buf, buflen, "PKCS7 - Unavailable feature, e.g. anything other than signed data" );
+        if( use_ret == -(MBEDTLS_ERR_PKCS7_INVALID_FORMAT) )
+            mbedtls_snprintf( buf, buflen, "PKCS7 - The CRT/CRL format is invalid, e.g. different type expected" );
+        if( use_ret == -(MBEDTLS_ERR_PKCS7_INVALID_VERSION) )
+            mbedtls_snprintf( buf, buflen, "PKCS7 - The PKCS7 version element is invalid or cannot be parsed" );
+        if( use_ret == -(MBEDTLS_ERR_PKCS7_INVALID_CONTENT_INFO) )
+            mbedtls_snprintf( buf, buflen, "PKCS7 - The PKCS7 content info invalid or cannot be parsed" );
+        if( use_ret == -(MBEDTLS_ERR_PKCS7_INVALID_ALG) )
+            mbedtls_snprintf( buf, buflen, "PKCS7 - The algorithm tag or value is invalid or cannot be parsed" );
+        if( use_ret == -(MBEDTLS_ERR_PKCS7_INVALID_SIGNATURE) )
+            mbedtls_snprintf( buf, buflen, "PKCS7 - Error parsing the signature" );
+        if( use_ret == -(MBEDTLS_ERR_PKCS7_INVALID_SIGNER_INFO) )
+            mbedtls_snprintf( buf, buflen, "PKCS7 - Error parsing the signer's info" );
+        if( use_ret == -(MBEDTLS_ERR_PKCS7_BAD_INPUT_DATA) )
+            mbedtls_snprintf( buf, buflen, "PKCS7 - Input invalid" );
+        if( use_ret == -(MBEDTLS_ERR_PKCS7_ALLOC_FAILED) )
+            mbedtls_snprintf( buf, buflen, "PKCS7 - Allocation of memory failed" );
+        if( use_ret == -(MBEDTLS_ERR_PKCS7_FILE_IO_ERROR) )
+            mbedtls_snprintf( buf, buflen, "PKCS7 - File Read/Write Error" );
+#endif /* MBEDTLS_PKCS7_C */
 
 #if defined(MBEDTLS_RSA_C)
         if( use_ret == -(MBEDTLS_ERR_RSA_BAD_INPUT_DATA) )
