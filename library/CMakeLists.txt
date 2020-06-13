@@ -76,6 +76,7 @@ set(src_x509
     x509_csr.c
     x509write_crt.c
     x509write_csr.c
+    pkcs7.c
 )
 
 set(src_tls

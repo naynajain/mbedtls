@@ -132,6 +132,7 @@ add_test_suite(version)
 add_test_suite(xtea)
 add_test_suite(x509parse)
 add_test_suite(x509write)
+add_test_suite(pkcs7)
 
 # Make scripts and data files needed for testing available in an
 # out-of-source build.
