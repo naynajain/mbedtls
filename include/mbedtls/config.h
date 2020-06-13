@@ -2916,6 +2916,20 @@
 #define MBEDTLS_VERSION_C
 
 /**
+ * \def MBEDTLS_PKCS7_USE_C
+ *
+ * Enable PKCS7 core for using PKCS7 formatted signatures.
+ *
+ * Module:  library/pkcs7.c
+ *
+ * Requires: MBEDTLS_ASN1_PARSE_C, MBEDTLS_OID_C, MBEDTLS_PK_PARSE_C,
+ *         MBEDTLS_X509_CRT_PARSE_C MBEDTLS_X509_CRL_PARSE_C, MBEDTLS_ERROR_C
+ *
+ * This module is required for the PKCS7 parsing modules.
+ */
+#define MBEDTLS_PKCS7_USE_C
+
+/**
  * \def MBEDTLS_X509_USE_C
  *
  * Enable X.509 core for using certificates.
