@@ -413,7 +413,7 @@ int mbedtls_pkcs7_parse_der( const unsigned char *buf, const int buflen,
 
     ret = pkcs7_get_content_info_type( &start, end, &pkcs7->content_type_oid );
     if( ret != 0 )
-        goto out;
+        goto try_data;
 
     if( ! MBEDTLS_OID_CMP( MBEDTLS_OID_PKCS7_DATA, &pkcs7->content_type_oid )
      || ! MBEDTLS_OID_CMP( MBEDTLS_OID_PKCS7_ENCRYPTED_DATA, &pkcs7->content_type_oid )
@@ -434,11 +434,22 @@ int mbedtls_pkcs7_parse_der( const unsigned char *buf, const int buflen,
 
     start = start + pkcs7->content_type_oid.len;
 
+try_data:
+
+
     ret = pkcs7_get_next_content_len( &start, end, &len );
     if( ret != 0 )
         goto out;
 
     ret = pkcs7_get_signed_data( start, len, &pkcs7->signed_data );
+	if (ret != 0)
+		goto out;
+
+    pkcs7->content_type_oid.tag = MBEDTLS_ASN1_OID;
+    pkcs7->content_type_oid.len = MBEDTLS_OID_SIZE(MBEDTLS_OID_PKCS7_SIGNED_DATA);
+	pkcs7->content_type_oid.p = (unsigned char *)MBEDTLS_OID_PKCS7_SIGNED_DATA;
+
+	ret = MBEDTLS_PKCS7_SIGNED_DATA;
 
 out:
     return( ret );
