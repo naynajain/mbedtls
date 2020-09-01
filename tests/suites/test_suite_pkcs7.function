@@ -266,7 +266,7 @@ void pkcs7_parse_content_oid( char *pkcs7_file )
 
     res = mbedtls_pkcs7_parse_der( pkcs7_buf, buflen, &pkcs7 );
     TEST_ASSERT( res != 0 );
-    TEST_ASSERT( res == -0x8080 );
+    TEST_ASSERT( res == MBEDTLS_ERR_PKCS7_FEATURE_UNAVAILABLE );
 exit:
     mbedtls_free( pkcs7_buf );
     mbedtls_pkcs7_free( &pkcs7 );
