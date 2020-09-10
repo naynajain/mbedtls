@@ -143,13 +143,13 @@ mbedtls_pkcs7;
 
 void mbedtls_pkcs7_init( mbedtls_pkcs7 *pkcs7 );
 
-int mbedtls_pkcs7_parse_der(const unsigned char *buf, const int buflen,
-                            mbedtls_pkcs7 *pkcs7);
+int mbedtls_pkcs7_parse_der( const unsigned char *buf, const int buflen,
+                             mbedtls_pkcs7 *pkcs7 );
 
-int mbedtls_pkcs7_signed_data_verify(mbedtls_pkcs7 *pkcs7,
-                                     mbedtls_x509_crt *cert,
-                                     const unsigned char *data,
-                                     size_t datalen);
+int mbedtls_pkcs7_signed_data_verify( mbedtls_pkcs7 *pkcs7,
+                                      mbedtls_x509_crt *cert,
+                                      const unsigned char *data,
+                                      size_t datalen );
 
 int mbedtls_pkcs7_signed_hash_verify( mbedtls_pkcs7 *pkcs7,
                                       mbedtls_x509_crt *cert,
