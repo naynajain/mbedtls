@@ -19,7 +19,7 @@
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
-#if defined(MBEDTLS_PKCS7_USE_C)
+#if defined(MBEDTLS_PKCS7_C)
 
 #include "mbedtls/x509.h"
 #include "mbedtls/asn1.h"
@@ -533,6 +533,8 @@ void mbedtls_pkcs7_free( mbedtls_pkcs7 *pkcs7 )
         mbedtls_platform_zeroize( name_prv, sizeof( mbedtls_x509_name ) );
         mbedtls_free( name_prv );
     }
+
+    mbedtls_platform_zeroize( pkcs7, sizeof( mbedtls_pkcs7 ) );
 }
 
 #endif
