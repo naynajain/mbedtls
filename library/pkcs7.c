@@ -110,8 +110,9 @@ static int pkcs7_get_next_content_len( unsigned char **p, unsigned char *end,
     int ret;
 
     if( ( ret = mbedtls_asn1_get_tag( p, end, len, MBEDTLS_ASN1_CONSTRUCTED
-                    | MBEDTLS_ASN1_CONTEXT_SPECIFIC ) ) != 0 )
+                    | MBEDTLS_ASN1_CONTEXT_SPECIFIC ) ) != 0 ) {
         return( MBEDTLS_ERR_PKCS7_INVALID_FORMAT + ret );
+	}
 
     return( 0 );
 }
@@ -144,11 +145,11 @@ static int pkcs7_get_content_info_type( unsigned char **p, unsigned char *end,
 
     ret = mbedtls_asn1_get_tag( p, end, &len, MBEDTLS_ASN1_CONSTRUCTED
                                             | MBEDTLS_ASN1_SEQUENCE );
-    if( ret )
+    if( ret != 0 )
         return( MBEDTLS_ERR_PKCS7_INVALID_CONTENT_INFO + ret );
 
     ret = mbedtls_asn1_get_tag( p, end, &len, MBEDTLS_ASN1_OID );
-    if( ret )
+    if( ret != 0 )
         return( MBEDTLS_ERR_PKCS7_INVALID_CONTENT_INFO + ret );
 
     pkcs7->tag = MBEDTLS_ASN1_OID;
@@ -193,7 +194,7 @@ static int pkcs7_get_digest_algorithm_set( unsigned char **p,
 
     /** For now, it assumes there is only one digest algorithm specified **/
     ret = mbedtls_asn1_get_alg_null( p, end, alg );
-    if( ret )
+    if( ret != 0 )
         return( MBEDTLS_ERR_PKCS7_INVALID_ALG + ret );
 
     return( 0 );
