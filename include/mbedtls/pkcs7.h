@@ -141,22 +141,82 @@ typedef struct mbedtls_pkcs7
 }
 mbedtls_pkcs7;
 
+/**
+ * \brief          Initialize pkcs7 structure 
+ *
+ * \param crt      pkcs7 structure 
+ */
 void mbedtls_pkcs7_init( mbedtls_pkcs7 *pkcs7 );
 
+/**
+ * \brief          Parse a single DER formatted pkcs7 content. 
+ *
+ * \param buf      The buffer holding the DER encoded pkcs7.
+ * \param buflen   The size in Bytes of \p buf.
+ *
+ * \note           This function makes an internal copy of the PKCS7 buffer
+ *                 \p buf. In particular, \p buf may be destroyed or reused
+ *                 after this call returns.
+ *
+ * \return         \c mbedtls_pkcs7_type, if successful.
+ * \return         A negative error code on failure.
+ */
 int mbedtls_pkcs7_parse_der( const unsigned char *buf, const int buflen,
                              mbedtls_pkcs7 *pkcs7 );
 
+/**
+ * \brief          Verification of PKCS7 signature. 
+ *
+ * \param pkcs7    PKCS7 structure containing signature.
+ * \param cert     Certificate containing key to verify signature.
+ * \param data     Plain data on which signature has to be verified.
+ * \param datalen  Length of the data.
+ *
+ * \note           This function internally calculates the hash on the supplied
+ *                 plain data for signature verification.
+ *
+ * \return         A negative error code on failure.
+ */
 int mbedtls_pkcs7_signed_data_verify( mbedtls_pkcs7 *pkcs7,
                                       mbedtls_x509_crt *cert,
                                       const unsigned char *data,
                                       size_t datalen );
 
+/**
+ * \brief          Verification of PKCS7 signature. 
+ *
+ * \param pkcs7    PKCS7 structure containing signature.
+ * \param cert     Certificate containing key to verify signature.
+ * \param hash     Hash of the plain data on which signature has to be verified.
+ * \param hashlen  Length of the hash.
+ *
+ * \note           This function is different from mbedtls_pkcs7_signed_data_verify()
+ *                 in a way that it directly recieves the hash of the data.
+ *
+ * \return         A negative error code on failure.
+ */
 int mbedtls_pkcs7_signed_hash_verify( mbedtls_pkcs7 *pkcs7,
                                       mbedtls_x509_crt *cert,
                                       const unsigned char *hash, int hashlen);
 
+/**
+ * \brief          Reads the PKCS7 data from the file in a buffer. 
+ *
+ * \param path     Path of the file.
+ * \param buf      Buffer to store the PKCS7 contents from the file.
+ * \param n        Size of the buffer (the contents read from the file).
+ * \param datalen  Length of the hash.
+ *
+ * \return         A negative error code on failure.
+ */
 int mbedtls_pkcs7_load_file( const char *path, unsigned char **buf, size_t *n );
 
+/**
+ * \brief          Unallocate all PKCS7 data and zeroize the memory.
+ *                 It doesn't free pkcs7 itself. It should be done by the caller.
+ *
+ * \param pkcs7    PKCS7 structure to free.
+ */
 void mbedtls_pkcs7_free(  mbedtls_pkcs7 *pkcs7 );
 
 #ifdef __cplusplus
