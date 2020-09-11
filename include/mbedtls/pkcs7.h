@@ -119,6 +119,7 @@ mbedtls_pkcs7_data;
 
 /**
  * Structure holding the signed data section
+ * Section 9.1 of RFC - https://tools.ietf.org/html/rfc2315.
  */
 typedef struct mbedtls_pkcs7_signed_data
 {
@@ -133,6 +134,7 @@ mbedtls_pkcs7_signed_data;
 
 /**
  * Structure holding PKCS7 structure, only signed data for now
+ * RFC - https://tools.ietf.org/html/rfc2315
  */
 typedef struct mbedtls_pkcs7
 {
