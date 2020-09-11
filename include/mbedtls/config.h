@@ -2953,6 +2953,7 @@
  * \def MBEDTLS_PKCS7_C
  *
  * Enable PKCS7 core for using PKCS7 formatted signatures.
+ * RFC Link - https://tools.ietf.org/html/rfc2315
  *
  * Module:  library/pkcs7.c
  *
