@@ -180,10 +180,13 @@ static int pkcs7_get_digest_algorithm( unsigned char **p, unsigned char *end,
  **/
 static int pkcs7_get_digest_algorithm_set( unsigned char **p,
                                            unsigned char *end,
-                                           mbedtls_x509_buf *alg )
+                                           mbedtls_asn1_sequence *alg )
 {
     size_t len = 0;
     int ret;
+	unsigned char *start;
+	mbedtls_asn1_sequence *seq;
+	mbedtls_asn1_sequence *seq_cur;
 
     ret = mbedtls_asn1_get_tag( p, end, &len, MBEDTLS_ASN1_CONSTRUCTED
                                             | MBEDTLS_ASN1_SET );
@@ -191,11 +194,33 @@ static int pkcs7_get_digest_algorithm_set( unsigned char **p,
         return( MBEDTLS_ERR_PKCS7_INVALID_ALG + ret );
 
     end = *p + len;
+	start = *p;
 
-    /** For now, it assumes there is only one digest algorithm specified **/
-    ret = mbedtls_asn1_get_alg_null( p, end, alg );
-    if( ret != 0 )
-        return( MBEDTLS_ERR_PKCS7_INVALID_ALG + ret );
+	while ( start != end ) {
+			/*
+			 * AlgorithmIdentifier{ALGORITHM-TYPE, ALGORITHM-TYPE:AlgorithmSet} ::=
+             * SEQUENCE {
+             *    algorithm   ALGORITHM-TYPE.&id({AlgorithmSet}),
+             *    parameters  ALGORITHM-TYPE.
+             *           &Params({AlgorithmSet}{@algorithm}) OPTIONAL
+             * }
+			 */
+			seq = mbedtls_calloc( 1, sizeof( mbedtls_asn1_sequence ) );
+			memset(seq, 0, sizeof( mbedtls_asn1_sequence ));
+			if (*p == start)
+				seq_cur = seq;
+			
+			ret = mbedtls_asn1_get_alg_null( &start, end, &seq->buf );
+			if( ret != 0 ) {
+					mbedtls_asn1_sequence_free(seq);
+					return( MBEDTLS_ERR_PKCS7_INVALID_ALG + ret );
+			}
+				
+			seq->next = NULL;
+	}
+
+	*p = start;
+	memcpy( alg, seq_cur, sizeof( mbedtls_asn1_sequence ) );
 
     return( 0 );
 }
@@ -361,7 +386,7 @@ static int pkcs7_get_signed_data( unsigned char *buf, size_t buflen,
         return( ret );
     }
 
-    ret = mbedtls_oid_get_md_alg( &signed_data->digest_alg_identifiers, &md_alg );
+    ret = mbedtls_oid_get_md_alg( &(signed_data->digest_alg_identifiers.buf), &md_alg );
     if( ret != 0 )
         return( MBEDTLS_ERR_PKCS7_INVALID_ALG + ret );
 
@@ -414,9 +439,6 @@ int mbedtls_pkcs7_parse_der( const unsigned char *buf, const int buflen,
 
     ret = pkcs7_get_content_info_type( &start, end, &pkcs7->content_type_oid );
 	if( ret != 0 ) {
-			start = ( unsigned char * )buf;
-			end = start + buflen;
-			len = buflen;
 			goto try_data;
 	}
 
@@ -470,7 +492,7 @@ int mbedtls_pkcs7_signed_data_verify( mbedtls_pkcs7 *pkcs7,
     const mbedtls_md_info_t *md_info;
     mbedtls_md_type_t md_alg;
 
-    ret = mbedtls_oid_get_md_alg( &pkcs7->signed_data.digest_alg_identifiers, &md_alg );
+    ret = mbedtls_oid_get_md_alg( &pkcs7->signed_data.digest_alg_identifiers.buf, &md_alg );
     if( ret != 0 )
         return( MBEDTLS_ERR_PKCS7_INVALID_ALG + ret );
 
@@ -500,7 +522,7 @@ int mbedtls_pkcs7_signed_hash_verify( mbedtls_pkcs7 *pkcs7,
     mbedtls_md_type_t md_alg;
     mbedtls_pk_context pk_cxt;
 
-    ret = mbedtls_oid_get_md_alg( &pkcs7->signed_data.digest_alg_identifiers, &md_alg );
+    ret = mbedtls_oid_get_md_alg( &pkcs7->signed_data.digest_alg_identifiers.buf, &md_alg );
     if( ret != 0 )
         return( MBEDTLS_ERR_PKCS7_INVALID_ALG + ret );
 

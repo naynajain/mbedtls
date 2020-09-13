@@ -124,7 +124,7 @@ mbedtls_pkcs7_data;
 typedef struct mbedtls_pkcs7_signed_data
 {
     int version;
-    mbedtls_pkcs7_buf digest_alg_identifiers;
+	mbedtls_asn1_sequence digest_alg_identifiers;
     struct mbedtls_pkcs7_data content;
     mbedtls_x509_crt certs;
     mbedtls_x509_crl crl;
