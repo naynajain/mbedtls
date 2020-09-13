@@ -110,7 +110,8 @@ static int pkcs7_get_next_content_len( unsigned char **p, unsigned char *end,
     int ret;
 
     if( ( ret = mbedtls_asn1_get_tag( p, end, len, MBEDTLS_ASN1_CONSTRUCTED
-                    | MBEDTLS_ASN1_CONTEXT_SPECIFIC ) ) != 0 ) {
+                    | MBEDTLS_ASN1_CONTEXT_SPECIFIC ) ) != 0 )
+	{
         return( MBEDTLS_ERR_PKCS7_INVALID_FORMAT + ret );
 	}
 
@@ -196,7 +197,8 @@ static int pkcs7_get_digest_algorithm_set( unsigned char **p,
     end = *p + len;
 	start = *p;
 
-	while ( start != end ) {
+	while ( start != end )
+	{
 			/*
 			 * AlgorithmIdentifier{ALGORITHM-TYPE, ALGORITHM-TYPE:AlgorithmSet} ::=
              * SEQUENCE {
@@ -211,7 +213,8 @@ static int pkcs7_get_digest_algorithm_set( unsigned char **p,
 				seq_cur = seq;
 			
 			ret = mbedtls_asn1_get_alg_null( &start, end, &seq->buf );
-			if( ret != 0 ) {
+			if( ret != 0 )
+			{
 					mbedtls_asn1_sequence_free(seq);
 					return( MBEDTLS_ERR_PKCS7_INVALID_ALG + ret );
 			}
@@ -241,7 +244,7 @@ static int pkcs7_get_certificates( unsigned char **buf, size_t buflen,
 
     /**
      * Currently we do not check for certificate chain, so we are not handling "> 0" case.
-     * Might have to revisit soon.
+	 * Return if atleast one certificate in the chain is correctly parsed. 
      **/
 
     return( 0 );
@@ -256,7 +259,7 @@ static int pkcs7_get_signature( unsigned char **p, unsigned char *end,
     int ret;
     size_t len = 0;
 
-    ret = mbedtls_asn1_get_tag(p, end, &len, MBEDTLS_ASN1_OCTET_STRING);
+    ret = mbedtls_asn1_get_tag( p, end, &len, MBEDTLS_ASN1_OCTET_STRING );
     if( ret != 0 )
         return( MBEDTLS_ERR_PKCS7_INVALID_SIGNATURE + ret );
 
@@ -268,6 +271,7 @@ static int pkcs7_get_signature( unsigned char **p, unsigned char *end,
 }
 
 /**
+ * SignerInfos ::= SET of SignerInfo
  * SignerInfo ::= SEQUENCE {
  *      version Version;
  *      issuerAndSerialNumber   IssuerAndSerialNumber,
@@ -307,6 +311,7 @@ static int pkcs7_get_signers_info_set( unsigned char **p, unsigned char *end,
     if( ret != 0 )
         return( MBEDTLS_ERR_PKCS7_INVALID_SIGNER_INFO + ret );
 
+	/* Parsing IssuerAndSerialNumber */
     signers_set->issuer_raw.p = *p;
 
     ret = mbedtls_asn1_get_tag( p, end_set, &len, MBEDTLS_ASN1_CONSTRUCTED
@@ -375,16 +380,16 @@ static int pkcs7_get_signed_data( unsigned char *buf, size_t buflen,
         return( ret );
 
     /* If version != 1, return invalid version */
-    if( signed_data->version != MBEDTLS_PKCS7_SUPPORTED_VERSION ) {
+    if( signed_data->version != MBEDTLS_PKCS7_SUPPORTED_VERSION )
+	{
         return( MBEDTLS_ERR_PKCS7_INVALID_VERSION );
     }
 
     /* Get digest algorithm */
     ret = pkcs7_get_digest_algorithm_set( &p, end,
             &signed_data->digest_alg_identifiers );
-    if( ret != 0 ) {
+    if( ret != 0 )
         return( ret );
-    }
 
     ret = mbedtls_oid_get_md_alg( &(signed_data->digest_alg_identifiers.buf), &md_alg );
     if( ret != 0 )
@@ -395,7 +400,8 @@ static int pkcs7_get_signed_data( unsigned char *buf, size_t buflen,
     if( ret != 0 )
         return( ret );
 
-    if( MBEDTLS_OID_CMP( MBEDTLS_OID_PKCS7_DATA, &signed_data->content.oid ) ) {
+    if( MBEDTLS_OID_CMP( MBEDTLS_OID_PKCS7_DATA, &signed_data->content.oid ) )
+	{
         return( MBEDTLS_ERR_PKCS7_INVALID_CONTENT_INFO ) ;
     }
 
@@ -403,13 +409,14 @@ static int pkcs7_get_signed_data( unsigned char *buf, size_t buflen,
 
     /* Look for certificates, there may or may not be any */
     ret = pkcs7_get_next_content_len( &p, end, &len );
-    if( ret == 0 ) {
+    if( ret == 0 )
+	{
         mbedtls_x509_crt_init( &signed_data->certs );
         ret = pkcs7_get_certificates( &p, len, &signed_data->certs );
         if( ret != 0 )
             return( ret ) ;
 
-      p = p + len;
+      	p = p + len;
     }
 
     /* TODO: optional CRLs go here */
@@ -431,16 +438,15 @@ int mbedtls_pkcs7_parse_der( const unsigned char *buf, const int buflen,
     int ret;
 
     /* use internal buffer for parsing */
-    start = ( unsigned char * )buf;
+    start = (unsigned char *)buf;
     end = start + buflen;
 
-    if(!pkcs7)
+    if( !pkcs7 )
         return( MBEDTLS_ERR_PKCS7_BAD_INPUT_DATA );
 
     ret = pkcs7_get_content_info_type( &start, end, &pkcs7->content_type_oid );
-	if( ret != 0 ) {
-			goto try_data;
-	}
+	if( ret != 0 )
+		goto try_data;
 
     if( ! MBEDTLS_OID_CMP( MBEDTLS_OID_PKCS7_DATA, &pkcs7->content_type_oid )
      || ! MBEDTLS_OID_CMP( MBEDTLS_OID_PKCS7_ENCRYPTED_DATA, &pkcs7->content_type_oid )
@@ -448,10 +454,10 @@ int mbedtls_pkcs7_parse_der( const unsigned char *buf, const int buflen,
      || ! MBEDTLS_OID_CMP( MBEDTLS_OID_PKCS7_SIGNED_AND_ENVELOPED_DATA, &pkcs7->content_type_oid )
      || ! MBEDTLS_OID_CMP( MBEDTLS_OID_PKCS7_DIGESTED_DATA, &pkcs7->content_type_oid )
      || ! MBEDTLS_OID_CMP( MBEDTLS_OID_PKCS7_ENCRYPTED_DATA, &pkcs7->content_type_oid ) )
-    {
-        ret =  MBEDTLS_ERR_PKCS7_FEATURE_UNAVAILABLE;
-        goto out;
-    }
+	{
+		ret =  MBEDTLS_ERR_PKCS7_FEATURE_UNAVAILABLE;
+		goto out;
+	}
 
     if( MBEDTLS_OID_CMP( MBEDTLS_OID_PKCS7_SIGNED_DATA, &pkcs7->content_type_oid ) )
     {
