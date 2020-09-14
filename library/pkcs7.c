@@ -66,17 +66,13 @@
 int mbedtls_pkcs7_load_file( const char *path, unsigned char **buf, size_t *n )
 {
     FILE *file;
-    struct stat st;
-    int rc;
-
-    rc = stat( path, &st );
-    if( rc )
-        return( MBEDTLS_ERR_PKCS7_FILE_IO_ERROR );
 
     if( ( file = fopen( path, "rb" ) ) == NULL )
         return( MBEDTLS_ERR_PKCS7_FILE_IO_ERROR );
 
-    *n = (size_t) st.st_size;
+    fseek( file, 0, SEEK_END );
+    *n = (size_t) ftell( file );
+    fseek( file, 0, SEEK_SET );
 
     *buf = mbedtls_calloc( 1, *n + 1 );
     if( *buf == NULL )
