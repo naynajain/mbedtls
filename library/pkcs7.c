@@ -205,6 +205,9 @@ static int pkcs7_get_digest_algorithm_set( unsigned char **p,
     if( ret != 0 )
         return( MBEDTLS_ERR_PKCS7_INVALID_ALG + ret );
 
+    if (*p != end)
+        return ( MBEDTLS_ERR_PKCS7_INVALID_SIGNER_INFO );
+
     return( 0 );
 }
 
