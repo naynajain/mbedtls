@@ -206,7 +206,7 @@ static int pkcs7_get_digest_algorithm_set( unsigned char **p,
         return( MBEDTLS_ERR_PKCS7_INVALID_ALG + ret );
 
     if (*p != end)
-        return ( MBEDTLS_ERR_PKCS7_INVALID_SIGNER_INFO );
+        return ( MBEDTLS_ERR_PKCS7_INVALID_FORMAT );
 
     return( 0 );
 }
@@ -221,9 +221,12 @@ static int pkcs7_get_certificates( unsigned char **p, unsigned char *end,
                                    mbedtls_x509_crt *certs )
 {
     int ret;
-	size_t len = 0;
+    size_t len1 = 0;
+    size_t len2 = 0;
+    unsigned char *end_set, *end_cert;
+    unsigned char *start = *p;
 
-    if( ( ret = mbedtls_asn1_get_tag( p, end, &len, MBEDTLS_ASN1_CONSTRUCTED
+    if( ( ret = mbedtls_asn1_get_tag( p, end, &len1, MBEDTLS_ASN1_CONSTRUCTED
                     | MBEDTLS_ASN1_CONTEXT_SPECIFIC ) ) != 0 )
     {
         if( ret == MBEDTLS_ERR_ASN1_UNEXPECTED_TAG )
@@ -231,15 +234,32 @@ static int pkcs7_get_certificates( unsigned char **p, unsigned char *end,
 
         return( MBEDTLS_ERR_PKCS7_INVALID_FORMAT + ret );
     }
+    start = *p;
+    end_set = *p + len1;
 
-    if( ( ret = mbedtls_x509_crt_parse( certs, *p, len ) ) < 0 )
+    /* This is to verify that there is only signer certificate, it can
+       have its chain though. */
+    ret = mbedtls_asn1_get_tag( p, end_set, &len2, MBEDTLS_ASN1_CONSTRUCTED
+            | MBEDTLS_ASN1_SEQUENCE );
+    if( ret != 0 )
+        return( MBEDTLS_ERR_PKCS7_INVALID_FORMAT + ret );
+
+    end_cert = *p + len2;
+
+    if (end_cert != end_set)
+        return (MBEDTLS_ERR_PKCS7_INVALID_FORMAT);
+
+    /* Since it satisfies the condition of single signer, continue parsing */ 
+    *p = start;
+    if( ( ret = mbedtls_x509_crt_parse( certs, *p, len1 ) ) < 0 )
         return( ret );
 
-    *p = *p + len;
+    *p = *p + len1;
 
     /**
-     * Currently we do not check for certificate chain, so we are not handling "> 0" case.
-	 * Return if atleast one certificate in the chain is correctly parsed.
+     * Currently we do not check for certificate chain, so we are not handling
+     * "> 0" case. Return if atleast one certificate in the chain is correctly
+     * parsed.
      **/
 
     return( 0 );
