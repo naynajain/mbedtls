@@ -1048,6 +1048,94 @@ cert_md5.crt: cert_md5.csr
 	$(MBEDTLS_CERT_WRITE) request_file=$< serial=6 issuer_crt=$(test_ca_crt) issuer_key=$(test_ca_key_file_rsa) issuer_pwd=$(test_ca_pwd_rsa) not_before=20190210144406 not_after=20290210144406 md=MD5 version=3 output_file=$@
 all_final += cert_md5.crt
 
+#PKCS7 test data
+pkcs7_test_cert_1 = pkcs7-rsa-sha256-1.crt
+pkcs7_test_cert_2 = pkcs7-rsa-sha256-2.crt
+pkcs7_test_file = pkcs7_data.txt
+
+#Generate signing cert
+pkcs7-rsa-sha256-1.crt:
+	$(OPENSSL) req -x509 -subj="/C=NL/O=PKCS7/CN=PKCS7 Cert 1" -sha256 -nodes -days 365  -newkey rsa:2048 -keyout pkcs7-rsa-sha256-1.key -out pkcs7-rsa-sha256-1.crt
+	cat pkcs7-rsa-sha256-1.crt > pkcs7-rsa-sha256-1.pem
+	cat pkcs7-rsa-sha256-1.key >> pkcs7-rsa-sha256-1.pem
+all_final += pkcs7-rsa-sha256-1.crt
+
+pkcs7-rsa-sha256-2.crt:
+	$(OPENSSL) req -x509 -subj="/C=NL/O=PKCS7/CN=PKCS7 Cert 2" -sha256 -nodes -days 365  -newkey rsa:2048 -keyout pkcs7-rsa-sha256-2.key -out pkcs7-rsa-sha256-2.crt
+	cat pkcs7-rsa-sha256-2.crt > pkcs7-rsa-sha256-2.pem
+	cat pkcs7-rsa-sha256-2.key >> pkcs7-rsa-sha256-2.pem
+all_final += pkcs7-rsa-sha256-2.crt
+
+#Generate data file to be signed
+pkcs7_data.txt:
+	echo "Hello" > $@
+	echo 2 >> pkcs7_data_1.txt
+all_final += pkcs7_data.txt
+
+#pkcs7 signature file with CERT
+pkcs7_data_cert.signed.sha256: pkcs7_data.txt pkcs7-rsa-sha256-1.crt
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.txt -out $@ -md sha256 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
+all_final += pkcs7_data_cert.signed.sha256
+
+#pkcs7 signature file with CERT and sha1
+pkcs7_data_cert.signed.sha1: pkcs7_data.txt
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.txt -out $@ -md sha1 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
+all_final += pkcs7_data_cert.signed.sha1
+
+#pkcs7 signature file with CERT and sha512
+pkcs7_data_cert.signed.sha512: pkcs7_data.txt
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.txt -out $@ -md sha512 -signer pkcs7-rsa-sha256-1.pem -noattr -outform DER -out $@
+all_final += pkcs7_data_cert.signed.sha512
+
+#pkcs7 signature file without CERT
+pkcs7_data_without_cert.signed: pkcs7_data.txt
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.txt -out $@ -md sha256 -signer pkcs7-rsa-sha256-1.pem -nocerts -noattr -outform DER -out $@
+all_final += pkcs7_data_without_cert.signed
+
+#pkcs7 signature file with multiple signers
+pkcs7_data_multiple.signed: pkcs7_data.txt
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.txt -out $@ -md sha256 -signer pkcs7-rsa-sha256-1.pem -signer pkcs7-rsa-sha256-2.pem -nocerts -noattr -outform DER -out $@
+all_final += pkcs7_data_multiple.signed
+
+#pkcs7 signature file with multiple certificates
+pkcs7_data_multiple_certs.signed: pkcs7_data.txt
+	$(OPENSSL) smime -sign -binary -in pkcs7_data.txt -out $@ -md sha256 -signer pkcs7-rsa-sha256-1.pem -signer pkcs7-rsa-sha256-2.pem -noattr -outform DER -out $@
+all_final += pkcs7_data_multiple_certs.signed
+
+#pkcs7 signature file with corrupted CERT
+pkcs7_data.signed.badcert: pkcs7_data.txt
+	cp pkcs7_data_cert.signed.sha256 $@
+	echo -en '\xa1' | dd of=$@ bs=1 seek=547 conv=notrunc
+all_final += pkcs7_data.signed.badcert
+
+#pkcs7 signature file with corrupted signer info
+pkcs7_data.signed.badsigner: pkcs7_data.txt
+	cp pkcs7_data_cert.signed.sha256 $@
+	echo -en '\xa1' | dd of=$@ bs=1 seek=918 conv=notrunc
+all_final += pkcs7_data.signed.badsigner
+
+#pkcs7 file with CRL
+pkcs7_data_crl.signed:
+		cat pkcs7-rsa-sha256-1.pem > pkcs7-rsa-crt-crl.pem
+		cat crl_sha256.pem >> pkcs7-rsa-crt-crl.pem
+		$(OPENSSL) smime -sign -binary -in pkcs7_data.txt -out $@ -md sha512 -signer pkcs7-rsa-crt-crl.pem -inkey pkcs7-rsa-sha256-1.key -noattr -outform DER -out $@
+all_final += pkcs7_data_crl.signed
+
+#pkcs7 file without CRL
+pkcs7_data_without_crl.signed:
+	    openssl crl2pkcs7 -nocrl -certfile pkcs7-rsa-sha256-1.pem -outform DER -out $@
+all_final += pkcs7_data_without_crl.signed
+
+#pkcs7 file with version 2
+pkcs7_data_cert.signed.v2:
+	cp pkcs7_data_cert.signed.sha256 $@
+	echo -en '\x02' | dd of=$@ bs=1 seek=25 conv=notrunc
+all_final += pkcs7_data_cert.signed.v2
+
+pkcs7_data_cert.encrypted:
+	openssl smime -encrypt -aes256 -in pkcs7_data.txt -binary -outform DER -out $@ pkcs7-rsa-sha256-1.crt
+all_final += pkcs7_data_cert.encrypted
+
 ################################################################
 #### Meta targets
 ################################################################
